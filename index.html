@@ -143,6 +143,9 @@
           max-height: none;
           width: 100%;
           padding: 1rem;
+          border-radius: 1rem;
+          box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+          margin-bottom: 70px;
         }
         
         #word-card .page-content {
@@ -151,7 +154,6 @@
           overflow-x: hidden;
           min-height: 0;
           width: 100%;
-          padding-bottom: 30px;
         }
         
         .page-footer {
@@ -165,9 +167,21 @@
           flex-shrink: 0;
         }
         
-        /* 单词页按钮区域在移动端 */
+        /* 单词页按钮区域在移动端固定在底部 */
         #word-card-footer {
-          flex-shrink: 0;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #f8fafc;
+          padding: 0.5rem 1rem;
+          padding-bottom: 1rem;
+          z-index: 10;
+        }
+        
+        /* 给单词页内容区域添加底部padding，避免被按钮遮挡 */
+        #word-card .page-content {
+          padding-bottom: 5px;
         }
         
         /* 移动端减小各个section的间距 */
@@ -176,7 +190,36 @@
         }
         
         #rap-section {
+          margin-bottom: 1rem;
+        }
+        
+        #homophone-section {
+          margin-bottom: 1rem;
+        }
+        
+        #root-section {
           margin-bottom: 0;
+        }
+        
+        /* 移动端隐藏切换按钮 */
+        #memory-toggle-btn {
+          display: none !important;
+        }
+        
+        #memory-back-btn {
+          display: none !important;
+        }
+        
+        /* 移动端默认显示谐音助记和词根词缀助记 */
+        #homophone-section,
+        #root-section {
+          display: block;
+        }
+        
+        /* 移动端没有助记内容时隐藏 */
+        #homophone-section.no-content,
+        #root-section.no-content {
+          display: none !important;
         }
       }
       
@@ -585,29 +628,6 @@
           </div>
         </div>
         
-        <!-- 趣味谐音助记区域 -->
-        <div id="homophone-section" class="mb-6 hidden">
-          <h3 id="homophone-title" class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center justify-between">
-            <div class="flex items-center">
-              <span class="example-line mr-2" style="background-color: #A855F7;"></span>趣味谐音助记
-            </div>
-            <button id="memory-back-btn" onclick="toggleMemoryHelper()" class="text-purple-500 hover:text-purple-600 transition-colors btn-bounce" title="返回默认视图">
-              😀
-            </button>
-          </h3>
-          <div id="homophone-content" class="bg-purple-50/50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-200/50 dark:border-purple-700/50 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-          </div>
-        </div>
-        
-        <!-- 词根词缀助记区域 -->
-        <div id="root-section" class="mb-6 hidden">
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-            <span class="example-line mr-2" style="background-color: #3B82F6;"></span>词根词缀助记
-          </h3>
-          <div id="root-content" class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-          </div>
-        </div>
-        
         <!-- 中英文结合语句 -->
         <div id="mixed-section" class="mb-6">
           <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
@@ -620,7 +640,7 @@
         </div>
         
         <!-- Rap语句 -->
-        <div id="rap-section">
+        <div id="rap-section" class="mb-6">
           <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
             <span class="rap-line mr-2"></span>Rap记忆
             <button onclick="speakRapSentence()" class="text-amber-500 hover:text-amber-600 transition-colors btn-bounce ml-2">
@@ -628,6 +648,29 @@
             </button>
           </h3>
           <p id="rap-sentence" class="text-sm mobile-break-after-period text-gray-800 dark:text-gray-200 bg-accent/5 p-4 rounded-xl"></p>
+        </div>
+        
+        <!-- 趣味谐音助记区域 -->
+        <div id="homophone-section" class="mb-6 hidden">
+          <h3 id="homophone-title" class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center justify-between">
+            <div class="flex items-center">
+              <span class="example-line mr-2" style="background-color: #A855F7;"></span>趣味谐音
+            </div>
+            <button id="memory-back-btn" onclick="toggleMemoryHelper()" class="text-purple-500 hover:text-purple-600 transition-colors btn-bounce" title="返回默认视图">
+              😀
+            </button>
+          </h3>
+          <div id="homophone-content" class="bg-purple-50/50 dark:bg-purple-900/10 p-4 rounded-xl border border-purple-200/50 dark:border-purple-700/50 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          </div>
+        </div>
+        
+        <!-- 词根词缀助记区域 -->
+        <div id="root-section" class="mb-6 hidden">
+          <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+            <span class="example-line mr-2" style="background-color: #3B82F6;"></span>词根词缀
+          </h3>
+          <div id="root-content" class="bg-blue-50/50 dark:bg-blue-900/10 p-4 rounded-xl border border-blue-200/50 dark:border-blue-700/50 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+          </div>
         </div>
       </div>
       </div>
@@ -1325,8 +1368,19 @@
       exampleContainer.classList.remove('hidden');
       mixedSection.classList.remove('hidden');
       rapSection.classList.remove('hidden');
-      homophoneSection.classList.add('hidden');
-      rootSection.classList.add('hidden');
+      
+      // 检查是否是移动端
+      const isMobile = window.innerWidth <= 640;
+      
+      if (isMobile) {
+        // 移动端：直接显示谐音和词根区域（由CSS控制）
+        // 不需要在这里设置hidden，CSS已经用!important控制了
+      } else {
+        // 桌面端：默认隐藏谐音和词根区域
+        homophoneSection.classList.add('hidden');
+        rootSection.classList.add('hidden');
+      }
+      
       // 重置图标为🤔
       if (toggleBtn) {
         toggleBtn.innerHTML = '🤔';
@@ -1368,16 +1422,27 @@
         // 更新助记内容
         const homophoneContent = document.getElementById('homophone-content');
         const rootContent = document.getElementById('root-content');
-        if (wordData.homophone) {
+        const homophoneSection = document.getElementById('homophone-section');
+        const rootSection = document.getElementById('root-section');
+        
+        // 检查是否有有效的助记内容（不是无助记）
+        const hasHomophone = wordData.homophone && !wordData.homophone.includes('无助记');
+        const hasRoot = wordData.root && !wordData.root.includes('无助记');
+        
+        if (hasHomophone) {
           homophoneContent.innerHTML = wordData.homophone;
+          homophoneSection.classList.remove('no-content');
         } else {
-          homophoneContent.innerHTML = "<p class='text-gray-500 italic'>无助记</p>";
+          homophoneSection.classList.add('no-content');
         }
-        if (wordData.root) {
+        
+        if (hasRoot) {
           rootContent.innerHTML = wordData.root;
+          rootSection.classList.remove('no-content');
         } else {
-          rootContent.innerHTML = "<p class='text-gray-500 italic'>无助记</p>";
+          rootSection.classList.add('no-content');
         }
+        
         counterElement.textContent = `${currentIndex}/${vocabularyList.length}`;
         
         // 应用灯泡状态（保持全局状态）
