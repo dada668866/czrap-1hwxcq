@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>酸奶单词 - 趣味背单词</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
+  <!-- 配置Tailwind -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#F59E0B',
+            dark: '#1E293B',
+            light: '#F8FAFC'
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      }
+    }
+  </script>
+  
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+      .card-shadow {
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
+      }
+      .card-hover {
+        transition: all 0.3s ease;
+      }
+      
+      /* 为单词卡片添加平滑的过渡效果 */
+      #word-card {
+        transition: opacity 0.2s ease-in-out;
+        will-change: opacity;
+      }
+      .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.15), 0 8px 10px -6px rgba(59, 130, 246, 0.15);
+      }
+      .text-gradient {
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        background-image: linear-gradient(45deg, #3B82F6, #10B981);
+      }
+      .btn-bounce {
+        transition: transform 0.2s ease;
+      }
+      .btn-bounce:active {
+        transform: scale(0.95);
+      }
+      
+      /* 移动端句号自动换行 */
+      .mobile-break-after-period {
+        /* 默认情况下不做特殊处理 */
+      }
+      
+      /* 为桌面端和移动端都增加洗脑记忆和Rap记忆的行间距 */
+      #mixed-sentence, #rap-sentence {
+        line-height: 1.8; /* 增加行间距，使每行之间的间距更高一些 */
+        text-align: left;
+        word-wrap: break-word;
+        white-space: pre-line; /* 保留换行但不保留多余空格 */
+      }
+      
+      @media (max-width: 640px) {
+        .mobile-break-after-period {
+          white-space: pre-wrap;
+          text-align: left; /* 确保文本左对齐 */
+        }
+        
+        /* 在句号后添加换行 */
+        .mobile-break-after-period::after {
+          content: "";
+        }
+        
+        /* 使用JavaScript处理句号后的换行，这里添加CSS辅助 */
+        .mobile-break-after-period span.period-break {
+          display: block;
+        }
+      }
+      /* 确保Font Awesome图标在所有设备上正常显示 */
+      .fa {
+        display: inline-block !important;
+        font-family: 'FontAwesome' !important;
+        font-style: normal !important;
+        font-weight: normal !important;
+        line-height: 1 !important;
+        speak: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        /* 确保图标大小在移动端足够清晰 */
+        font-size: inherit !important;
+      }
+      
+      /* 缩小例句、洗脑记忆和Rap记忆部分的喇叭图标 */
+      h3 > button .fa-volume-up {
+        font-size: 0.8em !important;
+        width: 1em;
+        height: 1em;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      /* 设置标题前的彩色竖线 */
+      .example-line {
+        width: 3px;
+        height: 0.9em;
+        background-color: #3B82F6; /* 蓝色 */
+        border-radius: 2px;
+        align-self: center;
+      }
+      
+      .memory-line {
+        width: 3px;
+        height: 0.9em;
+        background-color: #10B981; /* 绿色 */
+        border-radius: 2px;
+        align-self: center;
+      }
+      
+      .rap-line {
+        width: 3px;
+        height: 0.9em;
+        background-color: #F59E0B; /* 黄色 */
+        border-radius: 2px;
+        align-self: center;
+      }
+      
+      /* 移动端图标响应式优化 */
+      @media (max-width: 640px) {
+        .fa {
+          font-size: 1.2em !important;
+        }
+        
+        /* 移动端显示例句播放按钮 */
+        .example-speaker-btn {
+          display: inline-flex !important;
+        }
+        
+        /* 确保标题前的图标在移动端正确显示 */
+        h3 .fa {
+          margin-right: 0.5rem;
+          width: 1.2em;
+          height: 1.2em;
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        /* 确保喇叭按钮在移动端足够大，易于点击 */
+        button .fa-volume-up {
+          font-size: 1.3em !important;
+          width: 1.5em;
+          height: 1.5em;
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+      
+      /* 隐藏日语单词中的假名 */
+      .hidden-kana {
+        display: none;
+      }
+      
+      /* 释义和翻译遮罩效果 - 灰色色块 */
+      .meaning-masked {
+        position: relative;
+      }
+      
+      .meaning-masked::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #eaebee;
+        border-radius: 3px;
+        z-index: 10;
+      }
+      
+      /* 灯泡图标样式 */
+      .lightbulb-on {
+        color: #F59E0B;
+      }
+      
+      .lightbulb-off {
+        color: #9CA3AF;
+      }
+      
+      /* 移动端灯泡样式 */
+      @media (max-width: 640px) {
+        #lightbulb-icon {
+          font-size: 1.25rem !important;
+        }
+        
+        /* 缩小趣味故事标题后的喇叭图标 */
+        #story-speaker-icon {
+          font-size: 0.9rem !important;
+        }
+        
+        /* 缩小涉及单词列表中的喇叭图标 */
+        #word-list-container .fa-volume-up {
+          font-size: 0.85rem !important;
+        }
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-dark min-h-screen transition-colors duration-300">
+  <!-- 顶部导航已移除 -->
+
+  <!-- 主内容区 -->
+  <main class="container mx-auto px-4 py-8 md:py-16">
+    
+    <!-- 页面容器 -->
+    <div class="max-w-3xl mx-auto">
+      <!-- 趣味故事页面 -->
+      <div id="story-page" class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 card-shadow card-hover transition-all duration-500">
+        <!-- 页面标题 -->
+        <div class="flex justify-between items-center mb-2">
+          <div class="flex items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white flex items-center">
+              <span class="memory-line mr-2"></span>趣味故事
+            </h1>
+            <button onclick="toggleJapaneseWords()" class="ml-3 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors btn-bounce inline-block">
+              <i class="fa fa-eye" id="eye-icon"></i>
+            </button>
+            <button onclick="speakStoryContent()" class="ml-2 text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block">
+              <i class="fa fa-volume-up" id="story-speaker-icon"></i>
+            </button>
+          </div>
+          <!-- Tab选择器 -->
+          <div class="flex border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <button onclick="switchStoryTab('basic')" class="px-3 py-0.5 text-xs font-medium bg-secondary/10 text-secondary border-r border-gray-200 dark:border-gray-700 active-tab">基础</button>
+            <button onclick="switchStoryTab('rap')" class="px-3 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">RAP</button>
+          </div>
+        </div>
+        
+        <!-- 故事内容 -->
+        <div class="mb-8">
+          <!-- 基础版本 -->
+          <div id="basic-story" class="block">
+            <p class="font-medium text-gray-800 dark:text-white leading-loose mb-0 text-left text-base">
+              我拥有<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="a"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>a</span>项特别的<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="ability"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>ability</span>，让我<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="able"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>able</span>从容应对各种难题。我常常思索<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="about"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>about</span>远方的世界，向往<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="above"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>above</span>云端的辽阔，也满心期待前往<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="abroad"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>abroad</span>见识不同风景。那天，一位带着独特<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accent"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accent</span>的同学<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="absent"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>absent</span>没来，他向来不愿<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accept"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accept</span>他人帮助，没想到竟遇上了一场小小的<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accident"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accident</span>。
+            </p>
+          </div>
+          <!-- RAP版本 -->
+          <div id="rap-story" class="hidden">
+            <p class="font-medium text-gray-800 dark:text-white leading-loose mb-0 text-left text-base">
+              我有特别<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="ability"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>ability</span>，从容遇事总<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="able"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>able</span>。<br>
+              常思<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="about"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>about</span>天地阔，向往<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="above"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>above</span>云之侧。<br>
+              一心盼去<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="abroad"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>abroad</span>，看遍异域好景色。<br>
+              那日有位独特<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accent"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accent</span>客，偏偏<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="absent"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>absent</span>没来坐。<br>
+              向来不肯<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accept"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accept</span>谁帮衬，竟遇一场小<span style="color: #10B981; font-weight: 600; text-decoration: none; position: relative; display: inline-block; padding-bottom: 0.5px;" data-original-text="accident"><span style="position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background-color: #10B981; border-radius: 2px;"></span>accident</span>。
+            </p>
+          </div>
+        </div>
+        
+        <!-- 涉及单词标题 -->
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center">
+            <h2 class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white flex items-center">
+              <span class="memory-line mr-2"></span>涉及单词
+            </h2>
+            <button onclick="toggleAllWordMeanings();" class="ml-3 text-secondary/40 hover:text-secondary/60 transition-colors btn-bounce inline-block">
+              <i class="fa fa-retweet" id="toggle-icon"></i>
+            </button>
+          </div>
+          <!-- Tab选择器 -->
+          <div class="flex border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <button onclick="switchWordOrderTab('normal')" class="px-3 py-0.5 text-xs font-medium bg-secondary/10 text-secondary border-r border-gray-200 dark:border-gray-700 active-tab" id="word-order-normal">正序</button>
+            <button onclick="switchWordOrderTab('random')" class="px-3 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" id="word-order-random">乱序</button>
+          </div>
+        </div>
+        
+        <!-- 单词列表 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="word-list-container">
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'a /ə;eɪ/', 'art.(非特指的) 一 (个)')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">a /ə;eɪ/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">art.(非特指的) 一 (个)</p>
+            </div>
+            <button onclick="speakText('a', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'ability /əˈbɪləti/', 'n. 能力；才能')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">ability /əˈbɪləti/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">n. 能力；才能</p>
+            </div>
+            <button onclick="speakText('ability', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'able /ˈeɪbl/', 'a. 能够… 的；有能力的')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">able /ˈeɪbl/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">a. 能够… 的；有能力的</p>
+            </div>
+            <button onclick="speakText('able', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'about /əˈbaʊt/', 'adv. 左右；到处；各处 prep. 关于；对于；在… 各处、周围')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">about /əˈbaʊt/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">adv. 左右；到处；各处 prep. 关于；对于；在… 各处、周围</p>
+            </div>
+            <button onclick="speakText('about', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'above /əˈbʌv/', 'prep. 在… 上面；超出 adv. 在上面 a. 上面的')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">above /əˈbʌv/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">prep. 在… 上面；超出 adv. 在上面 a. 上面的</p>
+            </div>
+            <button onclick="speakText('above', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'abroad /əˈbrɔːd/', 'adv. 在国外；到国外')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">abroad /əˈbrɔːd/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">adv. 在国外；到国外</p>
+            </div>
+            <button onclick="speakText('abroad', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'absent /ˈæbsənt/', 'a. 缺席的；不在的')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">absent /ˈæbsənt/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">a. 缺席的；不在的</p>
+            </div>
+            <button onclick="speakText('absent', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'accent /ˈæksent/', 'n. 口音')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">accent /ˈæksent/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">n. 口音</p>
+            </div>
+            <button onclick="speakText('accent', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'accept /əkˈsept/', 'v. 接受')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">accept /əkˈsept/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">v. 接受</p>
+            </div>
+            <button onclick="speakText('accept', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+          <div class="bg-secondary/5 p-3 rounded-lg flex justify-between items-center cursor-pointer transition-colors duration-300" onclick="toggleWordMeaning(this, 'accident /ˈæksɪdənt/', 'n. 事故；意外；偶然')">
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-gray-800 dark:text-white word-text">accident /ˈæksɪdənt/</p>
+              <p class="font-medium text-gray-800 dark:text-white word-meaning hidden">n. 事故；意外；偶然</p>
+            </div>
+            <button onclick="speakText('accident', 'en-US'); event.stopPropagation();" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce inline-block ml-2 flex-shrink-0">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 单词卡片 -->
+      <div id="word-card" class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 card-shadow card-hover transition-all duration-500 hidden" style="position: relative;">
+        <!-- 右上角灯泡图标 -->
+        <div style="position: absolute; top: 26px; right: 20px; z-index: 20;">
+          <button onclick="toggleLightBulb()" class="btn-bounce" title="隐藏/显示释义">
+            <i class="fa fa-lightbulb-o text-2xl lightbulb-on" id="lightbulb-icon" style="font-size: 1.5rem;"></i>
+          </button>
+        </div>
+        
+        <!-- 单词和音标 -->
+        <div class="mb-2 word-phonetic-container">
+          <div class="word-container">
+            <h2 id="word" class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white"></h2>
+          </div>
+          <div class="phonetic-container">
+            <span id="phonetic" class="text-gray-500 dark:text-gray-400 italic mr-2"></span>
+            <button onclick="speakWord()" class="text-primary hover:text-primary/80 transition-colors btn-bounce inline-block">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </div>
+        </div>
+        <style>
+          /* 默认桌面端样式 */
+          .word-phonetic-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+          }
+          
+          /* 移动端样式：将音标和喇叭图标移到单词下方 */
+          @media (max-width: 767px) {
+            .word-phonetic-container {
+              flex-direction: column;
+              align-items: flex-start;
+            }
+            .phonetic-container {
+              margin-top: 0.5rem;
+            }
+          }
+        </style>
+        
+        <!-- 单词释义 -->
+        <div class="mb-6">
+          <div id="part-of-speech" onclick="toggleSingleMeaning('part-of-speech')" style="cursor: pointer;"></div>
+        </div>
+        
+        <!-- 例句 -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
+            <span class="example-line mr-2"></span>例句
+            <button onclick="speakExample()" class="text-primary hover:text-primary/80 transition-colors btn-bounce ml-2 example-speaker-btn">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </h3>
+          <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+            <p id="example-sentence" class="text-gray-800 dark:text-gray-200 mb-2"></p>
+            <p id="example-translation" onclick="toggleSingleMeaning('example-translation')" style="cursor: pointer;" class="text-gray-600 dark:text-gray-400 text-sm"></p>
+          </div>
+        </div>
+        
+        <!-- 中英文结合语句 -->
+        <div class="mb-6">
+          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
+            <span class="memory-line mr-2"></span>洗脑记忆
+            <button onclick="speakMixedSentence()" class="text-secondary/70 hover:text-secondary/90 transition-colors btn-bounce ml-2">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </h3>
+          <p id="mixed-sentence" class="text-sm text-gray-800 dark:text-gray-200 bg-secondary/5 p-4 rounded-xl"></p>
+        </div>
+        
+        <!-- Rap语句 -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center">
+            <span class="rap-line mr-2"></span>Rap记忆
+            <button onclick="speakRapSentence()" class="text-amber-500 hover:text-amber-600 transition-colors btn-bounce ml-2">
+              <i class="fa fa-volume-up"></i>
+            </button>
+          </h3>
+          <p id="rap-sentence" class="text-sm mobile-break-after-period text-gray-800 dark:text-gray-200 bg-accent/5 p-4 rounded-xl"></p>
+        </div>
+      </div>
+      
+      <!-- 导航按钮 -->
+      <div class="flex justify-between items-center mt-8">
+        <button id="prev-btn" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-full shadow hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-bounce">
+          <i class="fa fa-arrow-left mr-2"></i>上一个
+        </button>
+        <span id="word-counter" class="text-gray-400 dark:text-gray-500">1/10</span>
+        <button id="next-btn" class="bg-secondary text-white px-6 py-3 rounded-full shadow hover:shadow-md hover:bg-secondary/90 transition-all btn-bounce">
+          下一个<i class="fa fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 信息弹窗 -->
+  <div id="info-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full mx-4 transform transition-all">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="text-xl font-bold text-gray-800 dark:text-white">使用说明</h3>
+        <button id="close-modal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+        <li class="flex items-start">
+          <i class="fa fa-volume-up text-primary mt-1 mr-2"></i>
+          <span>点击喇叭图标可以朗读单词和例句</span>
+        </li>
+        <li class="flex items-start">
+          <i class="fa fa-arrow-left text-gray-500 mt-1 mr-2"></i>
+          <i class="fa fa-arrow-right text-gray-500 mt-1 mr-2"></i>
+          <span>使用箭头按钮切换单词</span>
+        </li>
+
+        <li class="flex items-start">
+          <i class="fa fa-star text-accent mt-1 mr-2"></i>
+          <span>通过趣味Rap语句和中英文洗脑内容帮助记忆单词</span>
+        </li>
+      </ul>
+      <button id="got-it-btn" class="mt-6 w-full bg-primary text-white py-3 rounded-lg hover:bg-primary/90 transition-colors btn-bounce">
+        明白了
+      </button>
+    </div>
+  </div>
+  <script>
+    // 移动端句号自动换行功能 - 只在移动端执行
+    function applyPeriodBreaks() {
+      // 只在移动端执行，电脑端直接返回
+      if (window.innerWidth > 640) return;
+      
+      const rapElement = document.getElementById('rap-sentence');
+      if (!rapElement) return;
+      
+      let content = rapElement.innerHTML;
+      
+      // 移除所有现有的br标签，避免重复添加
+      content = content.replace(/<br\s*\/?>/gi, '');
+      
+      // 先将原始换行符\n替换为空格，避免双重换行导致行间距过大
+      content = content.replace(/\n/g, ' ');
+      
+      // 移动端处理：在句号和波浪号后添加br标签
+      content = content.replace(/。/g, '。<br>').replace(/～/g, '～<br>');
+      
+      rapElement.innerHTML = content;
+    }
+    
+    // 页面加载完成后初始化
+    window.addEventListener('DOMContentLoaded', function() {
+      // 初始化页面
+      updateWordCard(true);
+      setupEventListeners();
+      
+      // 只在移动端应用换行处理
+      applyPeriodBreaks();
+    });
+    
+    // 保留窗口大小改变时的监听
+    window.addEventListener('resize', function() {
+      applyPeriodBreaks();
+    });
+    
+    // 单词数据
+    const vocabularyList = [
+      {
+        word: "a",
+        phonetic: "/ə;eɪ/",
+        partOfSpeech: "art.(非特指的) 一 (个)",
+        example: "I have a new English book in my schoolbag.",
+        exampleCn: "我的书包里有一本新的英语书。",
+        mixed: "我每天都带着 <strong class='text-secondary'>a</strong> 课本认真学习，课桌上放着 <strong class='text-secondary'>a</strong> 笔用来记笔记，书包里装着 <strong class='text-secondary'>a</strong> 水瓶随时补充水分。",
+        rap: "一件文具手中拿，一段知识心中扎。\n日常相伴用处大，<strong class='text-accent'>a</strong> 字记牢不掺假。"
+      },
+      {
+        word: "ability",
+        phonetic: "/əˈbɪləti/",
+        partOfSpeech: "n. 能力；才能",
+        example: "She has a special ability in dancing.",
+        exampleCn: "她在舞蹈方面有特殊的才能。",
+        mixed: "刻苦训练练就超强 <strong class='text-secondary'>ability</strong>，不断学习打磨独特 <strong class='text-secondary'>ability</strong>，长期积累提升核心 <strong class='text-secondary'>ability</strong>，在舞台上尽情发光。",
+        rap: "刻苦训练磨功底，不断学习塑自我。\n长期积累攀高峰，<strong class='text-accent'>ability</strong> 绽放不怯懦。"
+      },
+      {
+        word: "able",
+        phonetic: "/ˈeɪbl/",
+        partOfSpeech: "a. 能够… 的；有能力的",
+        example: "I am able to play the piano.",
+        exampleCn: "我会弹钢琴。",
+        mixed: "反复练习让我愈发 <strong class='text-secondary'>able</strong> 挑战新曲目，用心钻研使我更加 <strong class='text-secondary'>able</strong> 完成高难度演奏，坚持练习令我始终 <strong class='text-secondary'>able</strong> 展现精彩表演。",
+        rap: "反复练习攻新曲，用心钻研破难题。\n坚持演奏展风采，<strong class='text-accent'>able</strong> 追梦志不移。"
+      },
+      {
+        word: "about",
+        phonetic: "/əˈbaʊt/",
+        partOfSpeech: "adv. 左右；到处；各处 prep. 关于；对于；在… 各处、周围",
+        example: "We talk about our hobbies.",
+        exampleCn: "我们谈论我们的爱好。",
+        mixed: "和朋友闲聊 <strong class='text-secondary'>about</strong> 日常的喜好，和家人诉说 <strong class='text-secondary'>about</strong> 兴趣方向，和同学分享 <strong class='text-secondary'>about</strong> 热爱的事物，氛围轻松又愉快。",
+        rap: "闲聊日常谈喜好，诉说兴趣话衷肠。\n分享热爱多欢乐，<strong class='text-accent'>about</strong> 相伴情意长。"
+      },
+      {
+        word: "above",
+        phonetic: "/əˈbʌv/",
+        partOfSpeech: "prep. 在… 上面；超出 adv. 在上面 a. 上面的",
+        example: "The bird flies above the cloud.",
+        exampleCn: "小鸟在云朵上方飞翔。",
+        mixed: "雄鹰展翅翱翔 <strong class='text-secondary'>above</strong> 苍穹之巅，风筝飘摇飞舞 <strong class='text-secondary'>above</strong> 蓝天之上，飞鸟轻盈掠过 <strong class='text-secondary'>above</strong> 云海之间。",
+        rap: "雄鹰展翅翱苍穹，风筝飞舞映碧空。\n飞鸟掠云姿轻盈，<strong class='text-accent'>above</strong> 风光意无穷。"
+      },
+      {
+        word: "abroad",
+        phonetic: "/əˈbrɔːd/",
+        partOfSpeech: "adv. 在国外；到国外",
+        example: "My brother works abroad.",
+        exampleCn: "我的哥哥在国外工作。",
+        mixed: "怀揣志向远赴他乡 <strong class='text-secondary'>abroad</strong>，背起行囊奔赴异地 <strong class='text-secondary'>abroad</strong>，坚定初心去往远方 <strong class='text-secondary'>abroad</strong>，开拓全新的生活。",
+        rap: "怀揣志向赴他乡，背起行囊拓四方。\n坚定初心闯异地，<strong class='text-accent'>abroad</strong> 逐梦创辉煌。"
+      },
+      {
+        word: "absent",
+        phonetic: "/ˈæbsənt/",
+        partOfSpeech: "a. 缺席的；不在的",
+        example: "She is absent from the party.",
+        exampleCn: "她缺席了这场聚会。",
+        mixed: "突发事情让她今日 <strong class='text-secondary'>absent</strong> 朋友聚会，身体不适使她暂时 <strong class='text-secondary'>absent</strong> 集体活动，意外状况令她临时 <strong class='text-secondary'>absent</strong> 班级聚餐。",
+        rap: "突发琐事误相聚，身体微恙暂别离。\n静待安康重相逢，<strong class='text-accent'>absent</strong> 归来续情谊。"
+      },
+      {
+        word: "accent",
+        phonetic: "/ˈæksent/",
+        partOfSpeech: "n. 口音",
+        example: "He speaks with a nice accent.",
+        exampleCn: "他说话有着好听的口音。",
+        mixed: "他乡交谈带着独特 <strong class='text-secondary'>accent</strong>，异地沟通有着鲜明 <strong class='text-secondary'>accent</strong>，异国交流藏着特别 <strong class='text-secondary'>accent</strong>，尽显不同地域魅力。",
+        rap: "他乡言谈藏特色，异地沟通显风格。\n异国声线多韵味，<strong class='text-accent'>accent</strong> 入耳动心魄。"
+      },
+      {
+        word: "accept",
+        phonetic: "/əkˈsept/",
+        partOfSpeech: "v. 接受",
+        example: "I accept your kind help.",
+        exampleCn: "我接受你善意的帮助。",
+        mixed: "敞开心扉坦然去 <strong class='text-secondary'>accept</strong> 他人援手，放平心态从容去 <strong class='text-secondary'>accept</strong> 温暖关怀，包容世间温和去 <strong class='text-secondary'>accept</strong> 真诚相助。",
+        rap: "敞怀纳援存暖意，从容迎关怀温情。\n温和待世多善意，<strong class='text-accent'>accept</strong> 相助润心灵。"
+      },
+      {
+        word: "accident",
+        phonetic: "/ˈæksɪdənt/",
+        partOfSpeech: "n. 事故；意外；偶然",
+        example: "A small accident happened on the road.",
+        exampleCn: "路上发生了一起小意外。",
+        mixed: "行路疏忽易遇上突发 <strong class='text-secondary'>accident</strong>，驾车大意会碰到意外 <strong class='text-secondary'>accident</strong>，出行马虎易遭遇突发 <strong class='text-secondary'>accident</strong>，平安出行记心间。",
+        rap: "行路谨慎守规则，驾车细心避风波。\n平安相伴无烦扰，<strong class='text-accent'>accident</strong> 远离乐呵呵。"
+      }
+    ];
+    
+    // 当前页面索引 (0: 故事页面, 1-10: 单词页面)
+    let currentIndex = 0;
+    
+    // 灯泡状态（全局，对所有单词页生效）
+    let isLightBulbOn = true;
+    
+    // 单个单词页的含义状态（局部，每个单词独立）
+    let singleMeaningStates = {}; // { wordIndex: { partOfSpeech: boolean, exampleTranslation: boolean } }
+    
+    // 切换单个含义的显示/隐藏
+    function toggleSingleMeaning(type) {
+      const wordIndex = currentIndex - 1;
+      if (wordIndex < 0) return;
+      
+      const propKey = type === 'part-of-speech' ? 'partOfSpeech' : 'exampleTranslation';
+      
+      if (!singleMeaningStates[wordIndex]) {
+        singleMeaningStates[wordIndex] = {
+          partOfSpeech: isLightBulbOn ? true : false,
+          exampleTranslation: isLightBulbOn ? true : false
+        };
+      }
+      
+      singleMeaningStates[wordIndex][propKey] = !singleMeaningStates[wordIndex][propKey];
+      applyMeaningDisplay();
+    }
+    
+    // 应用含义显示状态
+    function applyMeaningDisplay() {
+      const wordIndex = currentIndex - 1;
+      const partOfSpeechEl = document.getElementById('part-of-speech');
+      const exampleTranslationEl = document.getElementById('example-translation');
+      const lightbulbIcon = document.getElementById('lightbulb-icon');
+      
+      if (lightbulbIcon) {
+        if (isLightBulbOn) {
+          lightbulbIcon.className = 'fa fa-lightbulb-o text-2xl lightbulb-on';
+          lightbulbIcon.style.fontSize = '1.5rem';
+        } else {
+          lightbulbIcon.className = 'fa fa-lightbulb-o text-2xl lightbulb-off';
+          lightbulbIcon.style.fontSize = '1.5rem';
+        }
+      }
+      
+      if (wordIndex >= 0 && singleMeaningStates[wordIndex]) {
+        if (singleMeaningStates[wordIndex].partOfSpeech) {
+          partOfSpeechEl?.classList.remove('meaning-masked');
+        } else {
+          partOfSpeechEl?.classList.add('meaning-masked');
+        }
+        
+        if (singleMeaningStates[wordIndex].exampleTranslation) {
+          exampleTranslationEl?.classList.remove('meaning-masked');
+        } else {
+          exampleTranslationEl?.classList.add('meaning-masked');
+        }
+      } else {
+        if (isLightBulbOn) {
+          partOfSpeechEl?.classList.remove('meaning-masked');
+          exampleTranslationEl?.classList.remove('meaning-masked');
+        } else {
+          partOfSpeechEl?.classList.add('meaning-masked');
+          exampleTranslationEl?.classList.add('meaning-masked');
+        }
+      }
+    }
+    
+    // 切换灯泡状态
+    function toggleLightBulb() {
+      isLightBulbOn = !isLightBulbOn;
+      
+      const wordIndex = currentIndex - 1;
+      if (wordIndex >= 0) {
+        if (!singleMeaningStates[wordIndex]) {
+          singleMeaningStates[wordIndex] = {
+            partOfSpeech: isLightBulbOn ? true : false,
+            exampleTranslation: isLightBulbOn ? true : false
+          };
+        } else {
+          singleMeaningStates[wordIndex].partOfSpeech = isLightBulbOn ? true : false;
+          singleMeaningStates[wordIndex].exampleTranslation = isLightBulbOn ? true : false;
+        }
+      }
+      
+      applyMeaningDisplay();
+    }
+    
+    // 应用灯泡状态（兼容旧调用）
+    function applyLightBulbState() {
+      applyMeaningDisplay();
+    }
+    
+    // DOM元素
+    const storyPage = document.getElementById('story-page');
+    const wordCard = document.getElementById('word-card');
+    const wordElement = document.getElementById('word');
+    const phoneticElement = document.getElementById('phonetic');
+    const partOfSpeechElement = document.getElementById('part-of-speech');
+    const exampleElement = document.getElementById('example-sentence');
+    const mixedElement = document.getElementById('mixed-sentence');
+    const rapElement = document.getElementById('rap-sentence');
+    const counterElement = document.getElementById('word-counter');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const infoBtn = document.getElementById('info-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeModal = document.getElementById('close-modal');
+    const gotItBtn = document.getElementById('got-it-btn');
+    
+    // 使用新的TTS API
+    function tryNewTTSAPI(text, lang = 'zh-CN', speed = 1.0, pitch = "0", voice = "zh-CN-XiaochenNeural", playingId = null) {
+      return new Promise(async (resolve, reject) => {
+        console.log('使用新TTS API播放:', text, 'speed:', speed, 'pitch:', pitch, 'voice:', voice);
+        
+        try {
+          const response = await fetch('https://sndcirap.ccwu.cc/v1/audio/speech', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              input: text,
+              voice: voice,
+              speed: speed,
+              pitch: pitch,
+              style: "affectionate"
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`API请求失败: ${response.status}`);
+          }
+          
+          const audioBlob = await response.blob();
+          const audioUrl = URL.createObjectURL(audioBlob);
+          
+          // 存储当前音频URL
+          currentAudioUrl = audioUrl;
+          currentPlayingId = playingId;
+          
+          const audio = new Audio();
+          currentAudio = audio;
+          audio.src = audioUrl;
+          
+          const timeout = setTimeout(() => {
+            console.error('新TTS API超时');
+            reject(new Error('新TTS API超时'));
+          }, 15000);
+          
+          audio.addEventListener('canplaythrough', () => {
+            clearTimeout(timeout);
+            console.log('新TTS API音频加载完成');
+          });
+          
+          audio.addEventListener('ended', () => {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(audioUrl);
+            if (currentAudioUrl === audioUrl) {
+              currentAudioUrl = null;
+              currentPlayingId = null;
+            }
+            console.log('新TTS API播放完成:', text);
+            resolve();
+          });
+          
+          audio.addEventListener('error', (error) => {
+            clearTimeout(timeout);
+            URL.revokeObjectURL(audioUrl);
+            if (currentAudioUrl === audioUrl) {
+              currentAudioUrl = null;
+              currentPlayingId = null;
+            }
+            console.error('新TTS API播放失败:', error);
+            reject(error);
+          });
+          
+          audio.play()
+            .then(() => {
+              console.log('新TTS API播放开始:', text);
+            })
+            .catch(error => {
+              clearTimeout(timeout);
+              URL.revokeObjectURL(audioUrl);
+              if (currentAudioUrl === audioUrl) {
+                currentAudioUrl = null;
+                currentPlayingId = null;
+              }
+              console.error('新TTS API播放失败:', error);
+              reject(error);
+            });
+        } catch (error) {
+          console.error('新TTS API初始化失败:', error);
+          reject(error);
+        }
+      });
+    }
+    
+    // 朗读洗脑记忆内容
+    function speakMixedSentence() {
+      const wordIndex = currentIndex - 1;
+      if (wordIndex >= 0 && wordIndex < vocabularyList.length) {
+        const wordData = vocabularyList[wordIndex];
+        const mixedText = wordData.mixed.replace(/<[^>]*>/g, '');
+        // 洗脑记忆：首选新TTS，备选Web Speech
+        stopCurrentAudio(); // 停止当前播放
+        tryNewTTSAPI(mixedText, 'zh-CN', 1.0, "0", "zh-CN-XiaochenNeural", `mixed-${wordIndex}`)
+          .catch(error => {
+            console.log('新TTS API失败，使用Web Speech API:', error);
+            speakTextWithRate(mixedText, 'zh-CN', 1.0);
+          });
+      }
+    }
+    
+    // 朗读Rap记忆内容
+    function speakRapSentence() {
+      const wordIndex = currentIndex - 1;
+      if (wordIndex >= 0 && wordIndex < vocabularyList.length) {
+        const wordData = vocabularyList[wordIndex];
+        const rapText = wordData.rap.replace(/<[^>]*>/g, '');
+        // Rap记忆：首选新TTS，备选Web Speech
+        stopCurrentAudio(); // 停止当前播放
+        tryNewTTSAPI(rapText, 'zh-CN', 1.0, "0", "zh-CN-XiaochenNeural", `rap-${wordIndex}`)
+          .catch(error => {
+            console.log('新TTS API失败，使用Web Speech API:', error);
+            speakTextWithRate(rapText, 'zh-CN', 1.0);
+          });
+      }
+    }
+    
+    // 朗读故事内容
+    function speakStoryContent() {
+      const basicStory = document.getElementById('basic-story');
+      const rapStory = document.getElementById('rap-story');
+      
+      let storyElement = null;
+      let isBasicStory = false;
+      
+      if (basicStory && !basicStory.classList.contains('hidden')) {
+        storyElement = basicStory.querySelector('p');
+        isBasicStory = true;
+      } else if (rapStory && !rapStory.classList.contains('hidden')) {
+        storyElement = rapStory.querySelector('p');
+        isBasicStory = false;
+      }
+      
+      if (storyElement) {
+        const storyText = storyElement.textContent;
+        // 趣味故事：首选新TTS，备选Web Speech
+        // 基础故事：speed=1.15, pitch=5
+        // RAP故事：speed=1.0, pitch=5
+        const speed = isBasicStory ? 1.15 : 1.0;
+        const pitch = "5";
+        stopCurrentAudio(); // 停止当前播放
+        tryNewTTSAPI(storyText, 'zh-CN', speed, pitch, "zh-CN-XiaochenNeural", isBasicStory ? 'story-basic' : 'story-rap')
+          .catch(error => {
+            console.log('新TTS API失败，使用Web Speech API:', error);
+            speakTextWithRate(storyText, 'zh-CN', 1.0);
+          });
+      }
+    }
+    
+    // 使用自定义语速播放语音
+    function speakTextWithRate(text, lang = 'zh-CN', rate = 1.0) {
+      console.log('使用自定义语速播放语音:', text, '语言:', lang, '语速:', rate);
+      
+      if (!userHasInteracted) {
+        initAudioSystem();
+        userHasInteracted = true;
+      }
+      
+      stopCurrentAudio();
+      
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        
+        // 生成播放ID
+        const playingId = `text-rate-${Date.now()}`;
+        currentPlayingId = playingId;
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lang;
+        utterance.rate = rate;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        utterance.onend = () => {
+          console.log('语音播放完成');
+          if (currentPlayingId === playingId) {
+            currentPlayingId = null;
+          }
+        };
+        
+        utterance.onerror = (error) => {
+          console.error('语音播放错误:', error);
+          if (currentPlayingId === playingId) {
+            currentPlayingId = null;
+          }
+        };
+        
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+    
+    // 初始化逻辑已移至DOMContentLoaded事件监听器
+    
+    /* 更新页面内容 */
+    function updateWordCard(isInitialLoad = false) {
+      // 隐藏所有页面
+      storyPage.classList.add('hidden');
+      wordCard.classList.add('hidden');
+      
+      if (currentIndex === 0) {
+        // 显示故事页面
+        storyPage.classList.remove('hidden');
+        counterElement.textContent = `1/11`;
+        prevBtn.disabled = true;
+        nextBtn.innerHTML = '下一个<i class="fa fa-arrow-right ml-2"></i>';
+      } else {
+        // 显示单词页面
+        wordCard.classList.remove('hidden');
+        
+        // 为了减少闪烁，我们不使用完全透明，而是使用更平滑的过渡效果
+        if (!isInitialLoad) {
+          // 只使用透明度变化，避免缩放带来的抖动，使用更短的过渡时间
+          wordCard.classList.add('transition-opacity', 'duration-200', 'opacity-80');
+        }
+        
+        // 获取单词数据（currentIndex-1 因为单词索引从0开始）
+        const wordData = vocabularyList[currentIndex - 1];
+        
+        // 不使用setTimeout延迟更新内容，这样可以减少闪烁
+        wordElement.textContent = wordData.word;
+        phoneticElement.textContent = wordData.phonetic;
+        // 将每个词性行包装在单独的span标签中，并为每个span添加圆角样式
+        const partsOfSpeech = wordData.partOfSpeech.split('\n').filter(part => part.trim());
+        partOfSpeechElement.innerHTML = partsOfSpeech.map(part => 
+          `<span class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium mb-1">${part}</span>`
+        ).join('');
+        exampleElement.textContent = wordData.example;
+        // 更新例句中文翻译，移除括号
+        const exampleTranslation = document.getElementById('example-translation');
+        exampleTranslation.textContent = wordData.exampleCn.replace(/[()]/g, '');
+        mixedElement.innerHTML = wordData.mixed;
+        rapElement.innerHTML = wordData.rap;
+        counterElement.textContent = `${currentIndex + 1}/11`;
+        
+        // 应用灯泡状态（保持全局状态）
+        applyLightBulbState();
+        
+        // 更新按钮状态
+        prevBtn.disabled = false;
+        
+        // 检查是否是最后一个单词
+        if (currentIndex === vocabularyList.length) {
+          nextBtn.innerHTML = '返回<i class="fa fa-arrow-right ml-2"></i>';
+        } else {
+          nextBtn.innerHTML = '下一个<i class="fa fa-arrow-right ml-2"></i>';
+        }
+        
+        // 使用setTimeout来移除动画类，创建平滑的过渡效果
+        if (!isInitialLoad) {
+          setTimeout(() => {
+            wordCard.classList.remove('opacity-70');
+          }, 50); // 较短的延迟，让过渡更自然
+        }
+      }
+    }
+    
+    // 朗读单词
+    function speakWord() {
+      if (currentIndex > 0) {
+        const word = vocabularyList[currentIndex - 1].word;
+        stopCurrentAudio(); // 停止当前播放
+        
+        const isMobile = isMobileDevice();
+        console.log('是否为移动端设备:', isMobile);
+        
+        const wordCount = word.split(' ').length;
+        console.log('单词数:', wordCount);
+        
+        if (word.length <= 30 && wordCount <= 3) {
+          // 英语单词：首选有道词典API
+          console.log('英语单词：使用有道词典API');
+          tryYoudaoAPI(word, 'en-US', `word-${currentIndex - 1}`)
+            .catch(error => {
+              console.log('有道词典API失败，使用备选TTS:', error);
+              
+              if (isMobile) {
+                // 移动端：备选新TTS API
+                console.log('移动端：使用新TTS API');
+                return tryNewTTSAPI(word, 'en-US', 0.85, "0", "en-US-AriaNeural", `word-${currentIndex - 1}`);
+              } else {
+                // 桌面端：根据浏览器类型选择备选TTS
+                const browser = detectBrowser();
+                console.log('当前浏览器:', browser);
+                
+                if (browser === 'edge') {
+                  // Edge浏览器：备选Web Speech API
+                  console.log('Edge浏览器：使用Web Speech API');
+                  return tryWebSpeechAPI(word, 'en-US', `word-${currentIndex - 1}`);
+                } else {
+                  // 其他桌面浏览器：备选新TTS API
+                  console.log('其他桌面浏览器：使用新TTS API');
+                  return tryNewTTSAPI(word, 'en-US', 0.85, "0", "en-US-AriaNeural", `word-${currentIndex - 1}`);
+                }
+              }
+            })
+            .catch(error => {
+              console.error('所有TTS服务均失败:', error);
+            });
+        } else {
+          // 英语短语词组：根据设备和浏览器类型选择TTS服务
+          console.log('英语短语词组：选择TTS服务');
+          
+          if (isMobile) {
+            // 移动端：使用新TTS API
+            console.log('移动端：使用新TTS API');
+            tryNewTTSAPI(word, 'en-US', 0.85, "0", "en-US-AriaNeural", `word-${currentIndex - 1}`)
+              .catch(error => {
+                console.log('新TTS API失败，使用Web Speech API:', error);
+                return tryWebSpeechAPI(word, 'en-US', `word-${currentIndex - 1}`);
+              })
+              .catch(error => {
+                console.error('所有TTS服务均失败:', error);
+              });
+          } else {
+            // 桌面端：根据浏览器类型选择TTS服务
+            const browser = detectBrowser();
+            console.log('当前浏览器:', browser);
+            
+            if (browser === 'edge') {
+              // Edge浏览器：使用Web Speech API
+              console.log('Edge浏览器：使用Web Speech API');
+              tryWebSpeechAPI(word, 'en-US', `word-${currentIndex - 1}`)
+                .catch(error => {
+                  console.log('Web Speech API失败，使用新TTS API:', error);
+                  return tryNewTTSAPI(word, 'en-US', 0.85, "0", "en-US-AriaNeural", `word-${currentIndex - 1}`);
+                })
+                .catch(error => {
+                  console.error('所有TTS服务均失败:', error);
+                });
+            } else {
+              // 其他桌面浏览器：使用新TTS API
+              console.log('其他桌面浏览器：使用新TTS API');
+              tryNewTTSAPI(word, 'en-US', 0.85, "0", "en-US-AriaNeural", `word-${currentIndex - 1}`)
+                .catch(error => {
+                  console.log('新TTS API失败，使用Web Speech API:', error);
+                  return tryWebSpeechAPI(word, 'en-US', `word-${currentIndex - 1}`);
+                })
+                .catch(error => {
+                  console.error('所有TTS服务均失败:', error);
+                });
+            }
+          }
+        }
+      }
+    }
+    
+    // 检测浏览器类型
+    function detectBrowser() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.includes('edg')) {
+        return 'edge';
+      } else if (userAgent.includes('chrome')) {
+        return 'chrome';
+      } else if (userAgent.includes('firefox')) {
+        return 'firefox';
+      } else if (userAgent.includes('safari')) {
+        return 'safari';
+      } else {
+        return 'other';
+      }
+    }
+    
+    // 检测是否为移动端设备
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+    
+    // 朗读例句
+    function speakExample() {
+      if (currentIndex > 0) {
+        const example = vocabularyList[currentIndex - 1].example;
+        stopCurrentAudio(); // 停止当前播放
+        
+        const isMobile = isMobileDevice();
+        console.log('是否为移动端设备:', isMobile);
+        
+        if (isMobile) {
+          // 移动端浏览器：调用新TTS，使用指定参数
+          console.log('移动端浏览器：使用新TTS API');
+          tryNewTTSAPI(example, 'en-US', 0.85, "0", "en-US-AriaNeural", `example-${currentIndex - 1}`)
+            .catch(error => {
+              console.log('新TTS API失败，使用Web Speech API:', error);
+              return tryWebSpeechAPI(example, 'en-US', `example-${currentIndex - 1}`);
+            })
+            .catch(error => {
+              console.error('所有TTS服务均失败:', error);
+            });
+        } else {
+          // 桌面端浏览器：根据浏览器类型选择TTS服务
+          const browser = detectBrowser();
+          console.log('当前浏览器:', browser);
+          
+          if (browser === 'edge') {
+            // Edge浏览器：首选Web Speech，备选新TTS
+            console.log('Edge浏览器：使用Web Speech API');
+            tryWebSpeechAPI(example, 'en-US', `example-${currentIndex - 1}`)
+              .catch(error => {
+                console.log('Web Speech API失败，使用新TTS:', error);
+                return tryNewTTSAPI(example, 'en-US', 0.85, "0", "en-US-AriaNeural", `example-${currentIndex - 1}`);
+              })
+              .catch(error => {
+                console.error('所有TTS服务均失败:', error);
+              });
+          } else {
+            // 其他桌面浏览器：首选新TTS，备选Web Speech
+            console.log('其他桌面浏览器：使用新TTS API');
+            tryNewTTSAPI(example, 'en-US', 0.85, "0", "en-US-AriaNeural", `example-${currentIndex - 1}`)
+              .catch(error => {
+                console.log('新TTS API失败，使用Web Speech API:', error);
+                return tryWebSpeechAPI(example, 'en-US', `example-${currentIndex - 1}`);
+              })
+              .catch(error => {
+                console.error('所有TTS服务均失败:', error);
+              });
+          }
+        }
+      }
+    }
+    
+    // 全局变量存储音频元素和用户交互状态
+    let userHasInteracted = false;
+    let currentAudio = null;
+    let currentAudioUrl = null;
+    let currentPlayingId = null;
+    
+    // 文本朗读功能 - 单词优先使用有道词典API，其他使用Web Speech API
+    function speakText(text, lang = 'en-US') {
+      console.log('请求播放语音:', text, '语言:', lang);
+      
+      // 检查用户是否已交互
+      if (!userHasInteracted) {
+        console.log('用户尚未交互，初始化音频系统');
+        initAudioSystem();
+        userHasInteracted = true;
+      }
+      
+      // 停止当前正在播放的音频
+      stopCurrentAudio();
+      
+      // 生成播放ID
+      const playingId = `text-${Date.now()}`;
+      
+      // 检查是否为英语内容
+      const isEnglish = (lang === 'en-US' || lang === 'en-GB');
+      const wordCount = text.split(' ').length;
+      console.log('英语内容:', isEnglish, '单词数:', wordCount);
+      
+      if (isEnglish) {
+        // 英语内容：根据单词数和设备类型选择TTS服务
+        const isMobile = isMobileDevice();
+        console.log('是否为移动端设备:', isMobile);
+        
+        if (text.length <= 30 && wordCount <= 3) {
+          // 英语单词：首选有道词典API
+          console.log('英语单词：使用有道词典API');
+          tryYoudaoAPI(text, lang, playingId)
+            .catch(error => {
+              console.log('有道词典API失败，使用备选TTS:', error);
+              
+              if (isMobile) {
+                // 移动端：备选新TTS API
+                console.log('移动端：使用新TTS API');
+                return tryNewTTSAPI(text, 'en-US', 0.85, "0", "en-US-AriaNeural", playingId);
+              } else {
+                // 桌面端：根据浏览器类型选择备选TTS
+                const browser = detectBrowser();
+                console.log('当前浏览器:', browser);
+                
+                if (browser === 'edge') {
+                  // Edge浏览器：备选Web Speech API
+                  console.log('Edge浏览器：使用Web Speech API');
+                  return tryWebSpeechAPI(text, lang, playingId);
+                } else {
+                  // 其他桌面浏览器：备选新TTS API
+                  console.log('其他桌面浏览器：使用新TTS API');
+                  return tryNewTTSAPI(text, 'en-US', 0.85, "0", "en-US-AriaNeural", playingId);
+                }
+              }
+            })
+            .catch(error => {
+              console.error('所有TTS服务均失败:', error);
+            });
+        } else {
+          // 英语短语词组：根据设备和浏览器类型选择TTS服务
+          console.log('英语短语词组：选择TTS服务');
+          
+          if (isMobile) {
+            // 移动端：使用新TTS API
+            console.log('移动端：使用新TTS API');
+            tryNewTTSAPI(text, 'en-US', 0.85, "0", "en-US-AriaNeural", playingId)
+              .catch(error => {
+                console.log('新TTS API失败，使用Web Speech API:', error);
+                return tryWebSpeechAPI(text, lang, playingId);
+              })
+              .catch(error => {
+                console.error('所有TTS服务均失败:', error);
+              });
+          } else {
+            // 桌面端：根据浏览器类型选择TTS服务
+            const browser = detectBrowser();
+            console.log('当前浏览器:', browser);
+            
+            if (browser === 'edge') {
+              // Edge浏览器：使用Web Speech API
+              console.log('Edge浏览器：使用Web Speech API');
+              tryWebSpeechAPI(text, lang, playingId)
+                .catch(error => {
+                  console.log('Web Speech API失败，使用新TTS API:', error);
+                  return tryNewTTSAPI(text, 'en-US', 0.85, "0", "en-US-AriaNeural", playingId);
+                })
+                .catch(error => {
+                  console.error('所有TTS服务均失败:', error);
+                });
+            } else {
+              // 其他桌面浏览器：使用新TTS API
+              console.log('其他桌面浏览器：使用新TTS API');
+              tryNewTTSAPI(text, 'en-US', 0.85, "0", "en-US-AriaNeural", playingId)
+                .catch(error => {
+                  console.log('新TTS API失败，使用Web Speech API:', error);
+                  return tryWebSpeechAPI(text, lang, playingId);
+                })
+                .catch(error => {
+                  console.error('所有TTS服务均失败:', error);
+                });
+            }
+          }
+        }
+      } else {
+        // 非英语内容：使用Web Speech API
+        console.log('非英语内容：使用Web Speech API');
+        tryWebSpeechAPI(text, lang, playingId)
+          .catch(error => {
+            console.error('Web Speech API失败:', error);
+          });
+      }
+    }
+    
+    // 使用有道词典API播放英语单词
+    function tryYoudaoAPI(text, lang = 'en-US', playingId = null) {
+      return new Promise((resolve, reject) => {
+        console.log('使用有道词典API播放:', text);
+        
+        const audio = new Audio();
+        currentAudio = audio;
+        currentPlayingId = playingId;
+        
+        // 根据语言选择type：0=美音，1=英音
+        const type = lang === 'en-GB' ? 1 : 0;
+        
+        // 使用HTTPS协议避免混合内容问题
+        const url = `https://dict.youdao.com/dictvoice?type=${type}&audio=${encodeURIComponent(text)}`;
+        
+        console.log('有道词典API URL:', url);
+        
+        audio.src = url;
+        
+        // 设置超时
+        const timeout = setTimeout(() => {
+          console.log('有道词典API超时');
+          currentPlayingId = null;
+          reject(new Error('有道词典API超时'));
+        }, 8000);
+        
+        audio.addEventListener('canplaythrough', () => {
+          clearTimeout(timeout);
+          console.log('有道词典API音频加载完成');
+        });
+        
+        audio.addEventListener('ended', () => {
+          clearTimeout(timeout);
+          console.log('有道词典API播放完成:', text);
+          currentPlayingId = null;
+          resolve();
+        });
+        
+        audio.addEventListener('error', (error) => {
+          clearTimeout(timeout);
+          console.log('有道词典API播放失败:', error);
+          currentPlayingId = null;
+          reject(error);
+        });
+        
+        // 播放音频
+        audio.play()
+          .then(() => {
+            console.log('有道词典API播放开始:', text);
+          })
+          .catch(error => {
+            clearTimeout(timeout);
+            console.log('有道词典API播放失败:', error);
+            currentPlayingId = null;
+            reject(error);
+          });
+      });
+    }
+    
+    // 使用Web Speech API进行语音合成
+    function tryWebSpeechAPI(text, lang = 'en-US', playingId = null) {
+      return new Promise((resolve, reject) => {
+        console.log('使用Web Speech API播放语音:', text, '语言:', lang);
+        
+        // 检查浏览器是否支持语音合成
+        if ('speechSynthesis' in window) {
+          try {
+            // 停止任何正在进行的朗读
+            window.speechSynthesis.cancel();
+            
+            // 设置当前播放ID
+            currentPlayingId = playingId;
+            
+            // 创建新的语音实例
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            
+            // 根据文本长度调整语速
+            if (text.length <= 20) {
+              utterance.rate = 0.85; // 单词：稍慢，清晰
+            } else {
+              utterance.rate = 0.75; // 例句/段落：更慢，确保每个词清晰
+            }
+            
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+            
+            // 监听语音事件
+            utterance.onend = () => {
+              console.log('Web Speech API播放完成:', text);
+              if (currentPlayingId === playingId) {
+                currentPlayingId = null;
+              }
+            };
+            
+            utterance.onerror = (error) => {
+              console.error('Web Speech API错误:', error);
+              if (currentPlayingId === playingId) {
+                currentPlayingId = null;
+              }
+            };
+            
+            // 立即播放语音
+            window.speechSynthesis.speak(utterance);
+            console.log('使用Web Speech API播放语音，语速:', utterance.rate);
+            
+            // 语音播放开始后立即resolve，而不是等待播放完成
+            resolve();
+          } catch (error) {
+            console.error('Web Speech API失败:', error);
+            currentPlayingId = null;
+            reject(error);
+          }
+        } else {
+          const error = new Error('浏览器不支持语音合成功能');
+          reject(error);
+        }
+      });
+    }
+    
+    // 初始化音频系统
+    function initAudioSystem() {
+      try {
+        // 创建音频上下文
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          const audioContext = new AudioContext();
+          
+          // 创建一个静默的音频，触发音频系统初始化
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = 0; // 静音
+          
+          oscillator.start();
+          oscillator.stop(audioContext.currentTime + 0.01);
+          
+          console.log('音频系统初始化成功');
+        }
+        
+        // 创建一个静默的音频元素，触发音频系统
+        const silentAudio = new Audio();
+        silentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAD';
+        silentAudio.play().catch(() => {
+          console.log('静默音频播放失败（预期行为）');
+        });
+        
+      } catch (error) {
+        console.error('音频系统初始化失败:', error);
+      }
+    }
+    
+    // 停止当前正在播放的音频
+    function stopCurrentAudio() {
+      // 停止Web Speech API
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      
+      // 停止当前音频元素
+      if (currentAudio) {
+        try {
+          currentAudio.pause();
+          currentAudio.currentTime = 0;
+        } catch (error) {
+          console.error('停止音频失败:', error);
+        }
+        currentAudio = null;
+      }
+      
+      // 释放当前音频URL
+      if (currentAudioUrl) {
+        try {
+          URL.revokeObjectURL(currentAudioUrl);
+        } catch (error) {
+          console.error('释放音频URL失败:', error);
+        }
+        currentAudioUrl = null;
+      }
+      
+      // 清除当前播放ID
+      currentPlayingId = null;
+    }
+    
+    // 监听用户交互，初始化音频系统
+    function setupUserInteractionListeners() {
+      // 监听多种用户交互事件
+      const interactionEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+      
+      interactionEvents.forEach(eventType => {
+        document.addEventListener(eventType, function initOnInteraction() {
+          if (!userHasInteracted) {
+            console.log('用户交互:', eventType);
+            initAudioSystem();
+            userHasInteracted = true;
+            
+            // 移除所有交互监听器
+            interactionEvents.forEach(type => {
+              document.removeEventListener(type, initOnInteraction);
+            });
+          }
+        }, { once: true });
+      });
+    }
+    
+    // 页面加载完成后设置用户交互监听器
+    document.addEventListener('DOMContentLoaded', function() {
+      setupUserInteractionListeners();
+      console.log('页面加载完成，设置用户交互监听器');
+    });
+    
+    // 切换到上一个页面
+    function prevWord() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateWordCard(false); // 传入false表示是切换页面，添加动画效果
+      }
+    }
+    
+    // 切换到下一个页面或返回第一个页面
+    function nextWord() {
+      if (currentIndex < vocabularyList.length) {
+        currentIndex++;
+      } else {
+        // 如果是最后一个单词页面，返回故事页面
+        currentIndex = 0;
+      }
+      updateWordCard(false); // 传入false表示是切换页面，添加动画效果
+    }
+    
+    // 显示信息弹窗
+    function showInfoModal() {
+      infoModal.classList.remove('hidden');
+      // 添加动画效果
+      const modalContent = infoModal.querySelector('div');
+      modalContent.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100', 'transition-all', 'duration-300');
+      }, 10);
+    }
+    
+    // 隐藏信息弹窗
+    function hideInfoModal() {
+      const modalContent = infoModal.querySelector('div');
+      modalContent.classList.remove('scale-100', 'opacity-100');
+      modalContent.classList.add('scale-95', 'opacity-0', 'transition-all', 'duration-300');
+      
+      setTimeout(() => {
+        infoModal.classList.add('hidden');
+      }, 300);
+    }
+    
+    // 设置事件监听器
+    function setupEventListeners() {
+      prevBtn.addEventListener('click', prevWord);
+      nextBtn.addEventListener('click', nextWord);
+      infoBtn.addEventListener('click', showInfoModal);
+      closeModal.addEventListener('click', hideInfoModal);
+      gotItBtn.addEventListener('click', hideInfoModal);
+      
+      // 键盘导航
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prevWord();
+        if (e.key === 'ArrowRight') nextWord();
+      });
+    }
+    
+    // 初始化函数
+    function init() {
+      // 初始化页面
+      updateWordCard(true);
+      setupEventListeners();
+    }
+    
+    // 切换单词和含义显示
+    function toggleWordMeaning(element, word, meaning) {
+      const wordText = element.querySelector('.word-text');
+      const wordMeaning = element.querySelector('.word-meaning');
+      const speakerButton = element.querySelector('button');
+      
+      if (wordMeaning.classList.contains('hidden')) {
+        // 显示含义，隐藏单词
+        wordText.classList.add('hidden');
+        wordMeaning.classList.remove('hidden');
+        // 改变背景色为更淡的橙色
+        element.classList.remove('bg-secondary/5');
+        element.classList.add('bg-accent/5');
+        // 改变喇叭颜色为橙色
+        if (speakerButton) {
+          speakerButton.classList.remove('text-secondary/70', 'hover:text-secondary/90');
+          speakerButton.classList.add('text-accent/70', 'hover:text-accent/90');
+        }
+      } else {
+        // 显示单词，隐藏含义
+        wordText.classList.remove('hidden');
+        wordMeaning.classList.add('hidden');
+        // 恢复背景色
+        element.classList.remove('bg-accent/5');
+        element.classList.add('bg-secondary/5');
+        // 恢复喇叭颜色为绿色
+        if (speakerButton) {
+          speakerButton.classList.remove('text-accent/70', 'hover:text-accent/90');
+          speakerButton.classList.add('text-secondary/70', 'hover:text-secondary/90');
+        }
+      }
+    }
+    
+    // 切换所有单词和含义显示
+    let isAllMeaningsShown = false;
+    function toggleAllWordMeanings() {
+      const wordElements = document.querySelectorAll('[onclick^="toggleWordMeaning"]');
+      const toggleIcon = document.getElementById('toggle-icon');
+      
+      wordElements.forEach(element => {
+        const wordText = element.querySelector('.word-text');
+        const wordMeaning = element.querySelector('.word-meaning');
+        
+        if (!isAllMeaningsShown) {
+          // 显示所有含义，隐藏所有单词
+          if (!wordMeaning.classList.contains('hidden')) return;
+          toggleWordMeaning(element);
+        } else {
+          // 显示所有单词，隐藏所有含义
+          if (wordMeaning.classList.contains('hidden')) return;
+          toggleWordMeaning(element);
+        }
+      });
+      
+      // 切换状态
+      isAllMeaningsShown = !isAllMeaningsShown;
+      
+      // 切换图标样式
+      if (isAllMeaningsShown) {
+        toggleIcon.classList.remove('fa-retweet');
+        toggleIcon.classList.add('fa-retweet', 'text-accent/50');
+      } else {
+        toggleIcon.classList.remove('text-accent/50');
+        toggleIcon.classList.add('fa-retweet');
+      }
+    }
+    
+    // 切换故事版本
+    let rapFontSizeState = 0;
+    let currentStoryTab = 'basic';
+    let originalRapContent = '';
+    
+    function applyRapFontSize() {
+      const applyStyle = () => {
+        const rapStory = document.getElementById('rap-story');
+        const rapParagraph = rapStory?.querySelector('p');
+        if (!rapParagraph) return;
+        
+        if (originalRapContent === '') {
+          originalRapContent = rapParagraph.innerHTML;
+        }
+        
+        if (rapFontSizeState === 0) {
+          rapParagraph.style.fontSize = '';
+          rapParagraph.style.textAlign = 'left';
+          rapParagraph.innerHTML = originalRapContent;
+          if (!areWordsVisible) {
+            const rapWordSpans = rapParagraph.querySelectorAll('span[data-original-text]');
+            rapWordSpans.forEach(span => {
+              span.style.color = 'transparent';
+            });
+          }
+        } else if (rapFontSizeState === 1) {
+          rapParagraph.style.fontSize = 'calc(1rem - 2px)';
+          rapParagraph.style.textAlign = 'left';
+          rapParagraph.innerHTML = originalRapContent;
+          if (!areWordsVisible) {
+            const rapWordSpans = rapParagraph.querySelectorAll('span[data-original-text]');
+            rapWordSpans.forEach(span => {
+              span.style.color = 'transparent';
+            });
+          }
+        } else if (rapFontSizeState === 2) {
+          rapParagraph.style.fontSize = 'calc(1rem - 2px)';
+          rapParagraph.style.textAlign = 'center';
+          
+          let tempDiv = document.createElement('div');
+          tempDiv.innerHTML = originalRapContent;
+          
+          let walker = document.createTreeWalker(tempDiv, NodeFilter.SHOW_TEXT, null, false);
+          let textNodes = [];
+          while (walker.nextNode()) {
+            textNodes.push(walker.currentNode);
+          }
+          
+          textNodes.forEach(textNode => {
+            let text = textNode.textContent;
+            if (/[，,。.??!!]/.test(text)) {
+              let parts = text.split(/([，,。.??!!])/);
+              let fragment = document.createDocumentFragment();
+              for (let i = 0; i < parts.length; i++) {
+                if (parts[i]) {
+                  if (/[，,。.??!!]/.test(parts[i])) {
+                    fragment.appendChild(document.createTextNode(parts[i]));
+                    fragment.appendChild(document.createElement('br'));
+                  } else {
+                    fragment.appendChild(document.createTextNode(parts[i]));
+                  }
+                }
+              }
+              textNode.parentNode.replaceChild(fragment, textNode);
+            }
+          });
+          
+          let lines = [];
+          let currentDiv = document.createElement('div');
+          currentDiv.style.display = 'block';
+          currentDiv.style.margin = '0.25rem 0';
+          
+          tempDiv.childNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+              lines.push(currentDiv.outerHTML);
+              currentDiv = document.createElement('div');
+              currentDiv.style.display = 'block';
+              currentDiv.style.margin = '0.25rem 0';
+            } else {
+              currentDiv.appendChild(node.cloneNode(true));
+            }
+          });
+          lines.push(currentDiv.outerHTML);
+          
+          rapParagraph.innerHTML = lines.join('');
+          if (!areWordsVisible) {
+            const rapWordSpans = rapParagraph.querySelectorAll('span[data-original-text]');
+            rapWordSpans.forEach(span => {
+              span.style.color = 'transparent';
+            });
+          }
+        }
+      };
+      
+      applyStyle();
+      setTimeout(applyStyle, 50);
+      setTimeout(applyStyle, 100);
+      setTimeout(applyStyle, 200);
+    }
+    
+    function switchStoryTab(tab) {
+      const basicStory = document.getElementById('basic-story');
+      const rapStory = document.getElementById('rap-story');
+      const basicTab = document.querySelectorAll('[onclick="switchStoryTab(\'basic\')"]')[0];
+      const rapTab = document.querySelectorAll('[onclick="switchStoryTab(\'rap\')"]')[0];
+      
+      if (tab === 'basic') {
+        basicStory.classList.remove('hidden');
+        basicStory.classList.add('block');
+        rapStory.classList.remove('block');
+        rapStory.classList.add('hidden');
+        
+        basicTab.classList.add('bg-secondary/10', 'text-secondary');
+        basicTab.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        rapTab.classList.remove('bg-secondary/10', 'text-secondary');
+        rapTab.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        
+        currentStoryTab = 'basic';
+      } else {
+        if (currentStoryTab === 'rap') {
+          rapFontSizeState = (rapFontSizeState + 1) % 3;
+          applyRapFontSize();
+          return;
+        }
+        
+        basicStory.classList.remove('block');
+        basicStory.classList.add('hidden');
+        rapStory.classList.remove('hidden');
+        rapStory.classList.add('block');
+        
+        rapTab.classList.add('bg-secondary/10', 'text-secondary');
+        rapTab.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        basicTab.classList.remove('bg-secondary/10', 'text-secondary');
+        basicTab.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        
+        currentStoryTab = 'rap';
+        applyRapFontSize();
+        
+        // 应用眼睛按钮状态到RAP故事
+        if (!areWordsVisible) {
+          const rapWordSpans = document.querySelectorAll('#rap-story span[data-original-text]');
+          rapWordSpans.forEach(span => {
+            span.style.color = 'transparent';
+          });
+        }
+      }
+    }
+    
+    // 存储原始单词列表顺序
+    let originalWordOrder = null;
+    
+    // 切换单词排序方式
+    function switchWordOrderTab(order) {
+      const normalTab = document.getElementById('word-order-normal');
+      const randomTab = document.getElementById('word-order-random');
+      const container = document.getElementById('word-list-container');
+      
+      if (!container) return;
+      
+      // 保存原始顺序（首次调用时）
+      if (originalWordOrder === null) {
+        originalWordOrder = Array.from(container.children);
+      }
+      
+      if (order === 'normal') {
+        // 恢复原始顺序
+        container.innerHTML = '';
+        originalWordOrder.forEach(item => container.appendChild(item.cloneNode(true)));
+        
+        // 更新tab样式
+        normalTab.classList.add('bg-secondary/10', 'text-secondary');
+        normalTab.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        randomTab.classList.remove('bg-secondary/10', 'text-secondary');
+        randomTab.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+      } else {
+        // 随机排序
+        const items = Array.from(container.children);
+        shuffleArray(items);
+        container.innerHTML = '';
+        items.forEach(item => container.appendChild(item));
+        
+        // 更新tab样式
+        randomTab.classList.add('bg-secondary/10', 'text-secondary');
+        randomTab.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+        normalTab.classList.remove('bg-secondary/10', 'text-secondary');
+        normalTab.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:bg-gray-100', 'dark:hover:bg-gray-700');
+      }
+    }
+    
+    // Fisher-Yates 洗牌算法
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+    
+    // 切换日语单词显示/隐藏
+    let areWordsVisible = true;
+    function toggleJapaneseWords() {
+      const eyeIcon = document.getElementById('eye-icon');
+      // 选择所有带有data-original-text属性的span元素，这些是日语单词
+      const wordSpans = document.querySelectorAll('#story-page span[data-original-text]');
+      
+      console.log('Found', wordSpans.length, 'Japanese word spans');
+      
+      wordSpans.forEach(span => {
+        if (areWordsVisible) {
+          // 隐藏单词文本，保持下划线可见
+          // 存储原始颜色
+          span.dataset.originalColor = span.style.color;
+          // 将文本颜色设置为透明
+          span.style.color = 'transparent';
+          console.log('Hidden word:', span.dataset.originalText);
+        } else {
+          // 恢复原始颜色
+          if (span.dataset.originalColor) {
+            span.style.color = span.dataset.originalColor;
+            console.log('Restored word:', span.dataset.originalText);
+          } else {
+            // 默认颜色
+            span.style.color = '#10B981';
+          }
+        }
+      });
+      
+      // 同时应用到RAP故事中的日语单词
+      const rapWordSpans = document.querySelectorAll('#rap-story span[data-original-text]');
+      rapWordSpans.forEach(span => {
+        if (areWordsVisible) {
+          span.style.color = 'transparent';
+        } else {
+          span.style.color = '#10B981';
+        }
+      });
+      
+      // 切换状态
+      areWordsVisible = !areWordsVisible;
+      
+      // 切换图标状态
+      if (areWordsVisible) {
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+        console.log('Icon changed to fa-eye');
+      } else {
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+        console.log('Icon changed to fa-eye-slash');
+      }
+    }
+    
+    // 初始化应用
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
