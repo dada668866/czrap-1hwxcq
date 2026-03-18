@@ -59,15 +59,15 @@
         flex: none;
       }
       
-      /* 单词卡片页 - 根据浏览器窗口自动调整高度，内容可滚动 */
+      /* 单词卡片页 - 网页端自适应大小 */
       #word-card:not(.hidden) {
         display: flex;
         flex-direction: column;
-        max-height: calc(100vh - 200px);
-        min-height: 500px;
+        max-height: calc(100vh - 160px);
+        min-height: 600px;
       }
       
-      /* 单词卡片内容区域 - 自动高度，可滚动 */
+      /* 单词卡片内容区域 - 网页端自适应大小 */
       #word-card .page-content {
         flex: 1;
         overflow-y: auto;
@@ -83,26 +83,104 @@
         padding-top: 2rem;
       }
       
-      /* 自定义滚动条样式 - 不可见 */
-      .page-content::-webkit-scrollbar,
-      .word-card-content::-webkit-scrollbar {
-        width: 6px;
+      /* 电脑端滚动条不可见 */
+      @media (min-width: 641px) {
+        .page-content::-webkit-scrollbar,
+        .word-card-content::-webkit-scrollbar {
+          width: 6px;
+        }
+        
+        .page-content::-webkit-scrollbar-track,
+        .word-card-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        
+        .page-content::-webkit-scrollbar-thumb,
+        .word-card-content::-webkit-scrollbar-thumb {
+          background: transparent;
+        }
+        
+        .page-content::-webkit-scrollbar-thumb:hover,
+        .word-card-content::-webkit-scrollbar-thumb:hover {
+          background: transparent;
+        }
       }
       
-      .page-content::-webkit-scrollbar-track,
-      .word-card-content::-webkit-scrollbar-track {
-        background: transparent;
+      /* 手机端 - 单词页按钮固定在底部 */
+      @media (max-width: 640px) {
+        body {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+        
+        main {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          padding-top: 1rem;
+          padding-bottom: 1rem;
+        }
+        
+        .max-w-3xl {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          width: 100%;
+        }
+        
+        /* 首页在移动端不需要flex:1，内容自动高度 */
+        #story-page:not(.hidden) {
+          display: block;
+          width: 100%;
+        }
+        
+        /* 单词页在移动端填充可用空间 */
+        #word-card:not(.hidden) {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+          min-height: 0;
+          max-height: none;
+          width: 100%;
+          padding: 1rem;
+        }
+        
+        #word-card .page-content {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          min-height: 0;
+          width: 100%;
+          padding-bottom: 30px;
+        }
+        
+        .page-footer {
+          padding-top: 1rem;
+          width: 100%;
+          flex-shrink: 0;
+        }
+        
+        /* 首页按钮区域在移动端 */
+        #story-page-footer {
+          flex-shrink: 0;
+        }
+        
+        /* 单词页按钮区域在移动端 */
+        #word-card-footer {
+          flex-shrink: 0;
+        }
+        
+        /* 移动端减小各个section的间距 */
+        #word-card .mb-6 {
+          margin-bottom: 1rem;
+        }
+        
+        #rap-section {
+          margin-bottom: 0;
+        }
       }
       
-      .page-content::-webkit-scrollbar-thumb,
-      .word-card-content::-webkit-scrollbar-thumb {
-        background: transparent;
-      }
-      
-      .page-content::-webkit-scrollbar-thumb:hover,
-      .word-card-content::-webkit-scrollbar-thumb:hover {
-        background: transparent;
-      }
       .card-hover:hover {
         transform: translateY(-5px);
         box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.15), 0 8px 10px -6px rgba(59, 130, 246, 0.15);
@@ -163,9 +241,9 @@
         font-size: inherit !important;
       }
       
-      /* 所有标题喇叭图标大小一致 */
+      /* 所有标题喇叭图标大小一致且稍微小一点 */
       h3 > button .fa-volume-up {
-        font-size: inherit !important;
+        font-size: 0.9em !important;
         width: auto;
         height: auto;
         display: inline !important;
@@ -217,14 +295,12 @@
           justify-content: center;
         }
         
-        /* 确保喇叭按钮在移动端足够大，易于点击 */
-        button .fa-volume-up {
-          font-size: 1.3em !important;
-          width: 1.5em;
-          height: 1.5em;
-          display: flex !important;
-          align-items: center;
-          justify-content: center;
+        /* 确保所有标题喇叭图标大小一致且稍微小一点 */
+        h3 button .fa-volume-up {
+          font-size: 0.9em !important;
+          width: auto;
+          height: auto;
+          display: inline !important;
         }
       }
       
@@ -282,12 +358,12 @@
   <!-- 顶部导航已移除 -->
 
   <!-- 主内容区 -->
-  <main class="container mx-auto px-4 py-8 md:py-16">
+  <main class="container mx-auto px-4 py-4 md:py-8">
     
     <!-- 页面容器 -->
     <div class="max-w-3xl mx-auto">
       <!-- 趣味故事页面 -->
-      <div id="story-page" class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 card-shadow card-hover transition-all duration-500">
+      <div id="story-page" class="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 card-shadow card-hover transition-all duration-500">
         <!-- 内容区域 - 可滚动 -->
         <div class="page-content">
         <!-- 页面标题 -->
