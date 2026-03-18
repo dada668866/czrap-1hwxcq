@@ -43,6 +43,65 @@
       #word-card {
         transition: opacity 0.2s ease-in-out;
         will-change: opacity;
+        position: relative;
+      }
+      
+      /* 首页和单词卡片页 - 显示时的flex布局（仅当没有hidden类时） */
+      /* 首页 - 高度自动调整，内容完整显示 */
+      #story-page:not(.hidden) {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      /* 首页内容区域 - 高度自动 */
+      #story-page .page-content {
+        overflow-y: visible;
+        flex: none;
+      }
+      
+      /* 单词卡片页 - 根据浏览器窗口自动调整高度，内容可滚动 */
+      #word-card:not(.hidden) {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 200px);
+        min-height: 500px;
+      }
+      
+      /* 单词卡片内容区域 - 自动高度，可滚动 */
+      #word-card .page-content {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        min-height: 0;
+        padding-right: 8px;
+        padding-bottom: 20px;
+      }
+      
+      /* 固定高度的按钮区域 */
+      .page-footer {
+        flex-shrink: 0;
+        padding-top: 2rem;
+      }
+      
+      /* 自定义滚动条样式 - 不可见 */
+      .page-content::-webkit-scrollbar,
+      .word-card-content::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      .page-content::-webkit-scrollbar-track,
+      .word-card-content::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      .page-content::-webkit-scrollbar-thumb,
+      .word-card-content::-webkit-scrollbar-thumb {
+        background: transparent;
+      }
+      
+      .page-content::-webkit-scrollbar-thumb:hover,
+      .word-card-content::-webkit-scrollbar-thumb:hover {
+        background: transparent;
       }
       .card-hover:hover {
         transform: translateY(-5px);
@@ -104,14 +163,12 @@
         font-size: inherit !important;
       }
       
-      /* 缩小例句、洗脑记忆和Rap记忆部分的喇叭图标 */
+      /* 所有标题喇叭图标大小一致 */
       h3 > button .fa-volume-up {
-        font-size: 0.8em !important;
-        width: 1em;
-        height: 1em;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
+        font-size: inherit !important;
+        width: auto;
+        height: auto;
+        display: inline !important;
       }
       
       /* 设置标题前的彩色竖线 */
@@ -231,6 +288,8 @@
     <div class="max-w-3xl mx-auto">
       <!-- 趣味故事页面 -->
       <div id="story-page" class="bg-white dark:bg-gray-800 rounded-2xl p-6 md:p-8 card-shadow card-hover transition-all duration-500">
+        <!-- 内容区域 - 可滚动 -->
+        <div class="page-content">
         <!-- 页面标题 -->
         <div class="flex justify-between items-center mb-2">
           <div class="flex items-center">
@@ -381,6 +440,7 @@
             </button>
           </div>
         </div>
+        </div>
       </div>
       
       <!-- 单词卡片 -->
@@ -392,6 +452,8 @@
           </button>
         </div>
         
+        <!-- 内容区域 - 可滚动 -->
+        <div class="page-content">
         <!-- 单词和音标 -->
         <div class="mb-2 word-phonetic-container">
           <div class="word-container">
@@ -493,9 +555,17 @@
           <p id="rap-sentence" class="text-sm mobile-break-after-period text-gray-800 dark:text-gray-200 bg-accent/5 p-4 rounded-xl"></p>
         </div>
       </div>
+      </div>
       
-      <!-- 导航按钮 -->
-      <div class="flex justify-between items-center mt-8">
+      <!-- 首页导航按钮 - 开始背词 -->
+      <div id="story-page-footer" class="page-footer flex justify-center items-center">
+        <button id="start-learning-btn" onclick="startLearning()" class="bg-secondary text-white px-12 py-3 rounded-full shadow hover:shadow-md hover:bg-secondary/90 transition-all btn-bounce">
+          开始背词
+        </button>
+      </div>
+      
+      <!-- 单词页导航按钮 - 上一个/页码/下一个 -->
+      <div id="word-card-footer" class="page-footer flex justify-between items-center hidden">
         <button id="prev-btn" class="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-6 py-3 rounded-full shadow hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed btn-bounce">
           <i class="fa fa-arrow-left mr-2"></i>上一个
         </button>
@@ -938,6 +1008,12 @@
       }
     }
     
+    // 开始学习按钮点击事件
+    function startLearning() {
+      currentIndex = 1;
+      updateWordCard();
+    }
+    
     // DOM元素
     const storyPage = document.getElementById('story-page');
     const wordCard = document.getElementById('word-card');
@@ -954,6 +1030,8 @@
     const infoModal = document.getElementById('info-modal');
     const closeModal = document.getElementById('close-modal');
     const gotItBtn = document.getElementById('got-it-btn');
+    const storyPageFooter = document.getElementById('story-page-footer');
+    const wordCardFooter = document.getElementById('word-card-footer');
     
     // 使用新的TTS API
     function tryNewTTSAPI(text, lang = 'zh-CN', speed = 1.0, pitch = "0", voice = "zh-CN-XiaochenNeural", playingId = null) {
@@ -1157,6 +1235,10 @@
       storyPage.classList.add('hidden');
       wordCard.classList.add('hidden');
       
+      // 隐藏所有按钮区域
+      storyPageFooter.classList.add('hidden');
+      wordCardFooter.classList.add('hidden');
+      
       // 重置助记内容显示状态
       isMemoryHelperVisible = false;
       const toggleBtn = document.getElementById('memory-toggle-btn');
@@ -1179,12 +1261,11 @@
       if (currentIndex === 0) {
         // 显示故事页面
         storyPage.classList.remove('hidden');
-        counterElement.textContent = `1/11`;
-        prevBtn.disabled = true;
-        nextBtn.innerHTML = '下一个<i class="fa fa-arrow-right ml-2"></i>';
+        storyPageFooter.classList.remove('hidden');
       } else {
         // 显示单词页面
         wordCard.classList.remove('hidden');
+        wordCardFooter.classList.remove('hidden');
         
         // 为了减少闪烁，我们不使用完全透明，而是使用更平滑的过渡效果
         if (!isInitialLoad) {
@@ -1222,13 +1303,13 @@
         } else {
           rootContent.innerHTML = "<p class='text-gray-500 italic'>无助记</p>";
         }
-        counterElement.textContent = `${currentIndex + 1}/11`;
+        counterElement.textContent = `${currentIndex}/${vocabularyList.length}`;
         
         // 应用灯泡状态（保持全局状态）
         applyLightBulbState();
         
         // 更新按钮状态
-        prevBtn.disabled = false;
+        prevBtn.disabled = currentIndex === 1;
         
         // 检查是否是最后一个单词
         if (currentIndex === vocabularyList.length) {
